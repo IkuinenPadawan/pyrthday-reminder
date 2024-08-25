@@ -10,5 +10,6 @@ services:
           - '5432:5432'
         volumes:
           - postgres_db:/var/lib/postgresql/data
+          - ./create_birthdays.sql:/docker-entrypoint-initdb.d/create_birthdays.sql
 volumes:
   postgres_db:
