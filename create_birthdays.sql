@@ -11,4 +11,4 @@ CREATE TABLE Persons (
 
 INSERT INTO Persons (first_name, birthday)
 VALUES
-('Teddy', '1858-01-06')
+('Teddy', TO_DATE('1858-01-06', 'YYYY-MM-DD')),
