@@ -8,21 +8,29 @@ from dotenv import load_dotenv
 load_dotenv()
 today = date.today()
 
-engine = create_engine("postgresql+psycopg2://postgres:postgres@localhost:5432/birthdays")
+engine = create_engine(os.getenv("DB_ENGINE_URL"))
 
-def is_birthday(birthday):
+def has_birthday_today(birthday):
     return today.month == birthday.month and today.day == birthday.day
 
-def send_email(subject, body, sender, recipient, password):
+def construct_email_message(first_name):
+    sender = os.getenv("EMAIL_FROM_ADDRESS")
+    recipient = os.getenv("EMAIL_TO_ADDRESS")
+    password = os.getenv("EMAIL_PASSWORD")
+    subject = "Birthday"
+    body = f"Today is {first_name}'s birthday!"
     msg = MIMEText(body)
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = recipient
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-       smtp_server.login(sender, password)
-       smtp_server.sendmail(sender, recipient, msg.as_string())
+    return msg
 
-def get_persons_from_db(engine):
+def send_email_with_smtp(msg):
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(os.getenv("EMAIL_FROM_ADDRESS"), os.getenv("EMAIL_PASSWORD"))
+        smtp_server.sendmail(msg['From'], msg['To'], msg.as_string())
+
+def fetch_people(engine):
     with engine.connect() as connection:
         result = connection.execute(text("SELECT * FROM persons;"))
 
@@ -30,15 +38,10 @@ def get_persons_from_db(engine):
             (person_id, first_name, birthday) = row
             yield person_id, first_name, birthday
 
-def send_birthday_email():
-    sender = os.getenv("EMAIL_FROM_ADDRESS")
-    recipient = os.getenv("EMAIL_TO_ADDRESS")
-    password = os.getenv("EMAIL_PASSWORD")
+def check_and_send_birthday_notification():
+    for _, first_name, birthday in fetch_people(engine):
+        if has_birthday_today(birthday):
+            email_message = construct_email_message(first_name)
+            send_email_with_smtp(email_message)
 
-    for _, first_name, birthday in get_persons_from_db(engine):
-        if is_birthday(birthday):
-            subject = "Birthday"
-            body = f"Today is {first_name}'s birthday!"
-            send_email(subject, body, sender, recipient, password)
-
-send_birthday_email()
+check_and_send_birthday_notification()
