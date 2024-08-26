@@ -7,8 +7,11 @@ engine = create_engine("postgresql+psycopg2://postgres:postgres@localhost:5432/b
 conn = engine.connect()
 result = conn.execute(text("SELECT * FROM persons;"))
 
+def is_birthday(birthday):
+    return today.month == birthday.month and today.day == birthday.day
+
 for row in result:
     (id, first_name, birthday) = row
 
-    if today.month == birthday.month and today.day == birthday.day:
+    if is_birthday(birthday):
         print(f"Today is {first_name}'s birthday!")
