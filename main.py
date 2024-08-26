@@ -21,20 +21,24 @@ def send_email(subject, body, sender, recipient, password):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
        smtp_server.login(sender, password)
        smtp_server.sendmail(sender, recipient, msg.as_string())
-    print("Message sent!")
 
-with engine.connect() as connection:
-    result = connection.execute(text("SELECT * FROM persons;"))
+def get_persons_from_db(engine):
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT * FROM persons;"))
 
-    for row in result:
-        (id, first_name, birthday) = row
+        for row in result:
+            (person_id, first_name, birthday) = row
+            yield person_id, first_name, birthday
 
+def send_birthday_email():
+    sender = os.getenv("EMAIL_FROM_ADDRESS")
+    recipient = os.getenv("EMAIL_TO_ADDRESS")
+    password = os.getenv("EMAIL_PASSWORD")
+
+    for _, first_name, birthday in get_persons_from_db(engine):
         if is_birthday(birthday):
-            print(f"Today is {first_name}'s birthday!")
             subject = "Birthday"
-            body = "Today is {} birthday!".format(first_name)
-            sender = os.getenv("EMAIL_FROM_ADDRESS")
-            recipient = os.getenv("EMAIL_TO_ADDRESS")
-            password = os.getenv("EMAIL_PASSWORD")
+            body = f"Today is {first_name}'s birthday!"
             send_email(subject, body, sender, recipient, password)
 
+send_birthday_email()
