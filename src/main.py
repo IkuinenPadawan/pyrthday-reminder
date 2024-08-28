@@ -44,4 +44,8 @@ def check_and_send_birthday_notification():
             email_message = construct_email_message(first_name)
             send_email_with_smtp(email_message)
 
-check_and_send_birthday_notification()
+def main():
+    check_and_send_birthday_notification()
+
+if __name__ == "__main__":
+    main()
