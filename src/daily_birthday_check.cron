@@ -1,0 +1,2 @@
+# Cron job to run a python script once a day at 6:00 AM UTC
+0 6 * * * python3 /app/main.py >>/tmp/out.log 2>/tmp/err.log

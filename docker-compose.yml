@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+    db:
+        image: postgres
+        restart: always
+        environment:
+          - POSTGRES_USER=postgres
+          - POSTGRES_PASSWORD=postgres
+        ports:
+          - '5432:5432'
+        volumes:
+          - postgres_db:/var/lib/postgresql/data
+          - ./create_birthdays.sql:/docker-entrypoint-initdb.d/create_birthdays.sql
+    python_cronjob:
+      build:
+        context: ./src/
+        dockerfile: Dockerfile
+      depends_on:
+        - db
+volumes:
+  postgres_db:
