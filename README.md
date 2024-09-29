@@ -66,8 +66,8 @@ To use the Birthday Reminder project, you'll need a Google App Password to send 
    INSERT INTO Persons (first_name, birthday)
    VALUES
    ('Teddy', TO_DATE('1858-01-06', 'YYYY-MM-DD')),
-   -- Add your rows here following the above format:
-   ('<name>', TO_DATE('<birthday>', 'YYYY-MM-DD')),
+   -- Add your rows here following the above format (omit comma from the end if only line):
+   ('<name>', TO_DATE('<birthday>', 'YYYY-MM-DD'))
 7. Run and build the application in the project root folder:
    ```sh
    docker-compose up --build -d
